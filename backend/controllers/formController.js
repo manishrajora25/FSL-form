@@ -6,7 +6,7 @@ export const createForm = async (req, res) => {
   try {
     const form = new FormModel(req.body);
     await form.save();
-    res.status(200).json({ message: "Form submitted successfully" });
+    res.status(200).json({ message: "Form submitted successfully", form });
   } catch (error) {
     console.error("Form submission error:", error);
     res
