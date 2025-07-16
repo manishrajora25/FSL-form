@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios"; 
+import  {instance}  from "../axiosConfig"; 
 import "./Home.css";
 
 const Home = () => {
@@ -9,25 +10,27 @@ const Home = () => {
     phone: "",
     dob: "",
     gender: "",
-    aadhaar: null,
-    aadhaar2: null,
     parentName: "",
     parentPhone: "",
-    occupation: "",
+    localAddress: "",
+    sameAsLocal: false,
+    permanentAddress: "",
+    occupation: "Student",
     qualification: "",
     year: "",
     college: "",
+    designation: "",
+    company: "",
     course: "",
     source: "",
+    friendName:"",
     agreed: false,
   });
 
   const handleChange = (e) => {
-    const { name, value, type, checked, files } = e.target;
+    const { name, value, type, checked } = e.target;
     if (type === "checkbox") {
       setFormData((prev) => ({ ...prev, [name]: checked }));
-    } else if (type === "file") {
-      setFormData((prev) => ({ ...prev, [name]: files[0] }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -35,55 +38,46 @@ const Home = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     if (!formData.agreed) {
       alert("Please agree to the Terms & Conditions before submitting.");
       return;
     }
-  
 
-    
+    try {
+      const response = await instance.post("/details/add", formData);
 
-    // Prepare data (convert files to filenames if needed)
-    const finalData = {
-      ...formData,
-      aadhaar: formData.aadhaar?.name || "No file",
-      aadhaar2: formData.aadhaar2?.name || "No file",
-    };
+      alert("Form submitted successfully!");
+      console.log("(200) Form submitted:", response.data);
 
-
-    setFormData({
+      setFormData({
         name: "",
         email: "",
         phone: "",
         dob: "",
         gender: "",
-        aadhaar: null,
-        aadhaar2: null,
         parentName: "",
         parentPhone: "",
-        occupation: "",
+        localAddress: "",
+        sameAsLocal: false,
+        permanentAddress: "",
+        occupation: "Student",
         qualification: "",
         year: "",
         college: "",
+        designation: "",
+        company: "",
         course: "",
         source: "",
+        friendName:"",
         agreed: false,
-    })
+      });
 
-
-  
-    try {
-      const response = await axios.post("http://localhost:3000/api/details/add", finalData);
-      console.log("(200) Form submitted:", response.data);
-      alert("Form submitted successfully!");
-      setFormData="";
     } catch (error) {
       console.error("(500) Submission error:", error);
       alert("Failed to submit form.");
     }
   };
-  
 
   return (
     <form onSubmit={handleSubmit} className="max-w-[95%] mx-auto mt-8 space-y-8">
@@ -123,11 +117,12 @@ const Home = () => {
             </div>
           </div>
 
-          <div className="flex gap-8 items-center">
+          <div className="flex gap-11 items-center">
             <label className="font-medium">Aadhaar Card</label>
-            <input type="file" name="aadhaar" onChange={handleChange}  />
-            <input type="file" name="aadhaar2" onChange={handleChange} />
+            <input type="file" name="aadhaar" onChange={handleChange}  className="bg-gray-500 p-[5px] w-[200px] text-white border-2-black raunded-lg" />
+            <input type="file" name="aadhaar2" onChange={handleChange}  className="bg-gray-500 p-[5px] w-[200px] text-white border-2-black raunded-lg" />
           </div>
+
         </div>
       </div>
 
@@ -146,6 +141,42 @@ const Home = () => {
         </div>
       </div>
 
+      {/* Residential Details */}
+      <div className="border rounded">
+        <div className="bg-gray-100 border-b px-4 py-2 font-medium">Residential Details</div>
+        <div className="p-4 space-y-4">
+          <div className="flex flex-col">
+            <label className="font-medium mb-1">Local Address</label>
+            <textarea name="localAddress" value={formData.localAddress} onChange={(e) => {
+              handleChange(e);
+              if (formData.sameAsLocal) {
+                setFormData((prev) => ({
+                  ...prev,
+                  permanentAddress: e.target.value
+                }));
+              }
+            }} placeholder="Enter your local address (Where you stay in jaipur)" className="p-2 border rounded" />
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <input type="checkbox" name="sameAsLocal" checked={formData.sameAsLocal} onChange={(e) => {
+              const checked = e.target.checked;
+              setFormData((prev) => ({
+                ...prev,
+                sameAsLocal: checked,
+                permanentAddress: checked ? prev.localAddress : ""
+              }));
+            }} className="h-5 w-5" />
+            <label className="text-sm">Permanent address is the same as local address</label>
+          </div>
+
+          <div className="flex flex-col">
+            <label className="font-medium mb-1">Permanent Address</label>
+            <textarea name="permanentAddress" value={formData.permanentAddress}  readOnly onChange={handleChange} disabled={formData.sameAsLocal} placeholder="Enter your permanent address (address of your hometown)" className="p-2 border rounded bg-white disabled:bg-gray-100"/>
+          </div>
+        </div>
+      </div>
+
       {/* Educational Details */}
       <div className="border rounded">
         <div className="bg-gray-100 border-b px-4 py-2 font-medium">Educational Details</div>
@@ -155,27 +186,42 @@ const Home = () => {
             <div className="flex space-x-6">
               {["Student", "Working Professional"].map((o) => (
                 <label key={o} className="flex items-center space-x-1">
-                  <input type="radio" name="occupation" value={o} onChange={handleChange} required checked={formData.occupation === o} />
+                  <input type="radio" name="occupation" value={o} onChange={handleChange} checked={formData.occupation === o} required />
                   <span>{o}</span>
                 </label>
               ))}
             </div>
           </div>
 
-          <div className="flex items-center space-x-4">
-            <label className="w-48 font-medium">Last Qualification</label>
-            <input type="text" name="qualification" value={formData.qualification} onChange={handleChange} required placeholder="Your qualification" className="flex-1 p-2 border rounded" />
-          </div>
+          {formData.occupation === "Student" && (
+            <>
+              <div className="flex items-center space-x-4">
+                <label className="w-48 font-medium">Last Attained Qualification</label>
+                <input type="text" name="qualification" value={formData.qualification} onChange={handleChange} placeholder="Enter your qualification" className="flex-1 p-2 border rounded" required />
+              </div>
+              <div className="flex items-center space-x-4">
+                <label className="w-48 font-medium">Year</label>
+                <input type="text" name="year" value={formData.year} onChange={handleChange} placeholder="Enter your completion year" className="flex-1 p-2 border rounded" required />
+              </div>
+              <div className="flex items-center space-x-4">
+                <label className="w-48 font-medium">College / University</label>
+                <input type="text" name="college" value={formData.college} onChange={handleChange} placeholder="College / University" className="flex-1 p-2 border rounded" required />
+              </div>
+            </>
+          )}
 
-          <div className="flex items-center space-x-4">
-            <label className="w-48 font-medium">Year</label>
-            <input type="text" name="year" value={formData.year} onChange={handleChange} required placeholder="Completion year" className="flex-1 p-2 border rounded" />
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <label className="w-48 font-medium">College / University</label>
-            <input type="text" name="college" value={formData.college} onChange={handleChange} required placeholder="Enter college" className="flex-1 p-2 border rounded" />
-          </div>
+          {formData.occupation === "Working Professional" && (
+            <>
+              <div className="flex items-center space-x-4">
+                <label className="w-48 font-medium">Designation</label>
+                <input type="text" name="designation" value={formData.designation} onChange={handleChange} placeholder="Enter your designation" className="flex-1 p-2 border rounded" required />
+              </div>
+              <div className="flex items-center space-x-4">
+                <label className="w-48 font-medium">Company</label>
+                <input type="text" name="company" value={formData.company} onChange={handleChange} placeholder="Enter your company name" className="flex-1 p-2 border rounded" required />
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -196,16 +242,41 @@ const Home = () => {
           </div>
 
           <div className="flex items-center space-x-4">
-            <label className="w-48 font-medium">How did you hear about us?</label>
-            <div className="flex flex-wrap gap-4">
-              {["Google", "LinkedIn", "Instagram", "College TPO", "Friend"].map((src) => (
-                <label key={src} className="flex items-center space-x-1">
-                  <input type="radio" name="source" value={src} onChange={handleChange} required checked={formData.source === src} />
-                  <span>{src}</span>
-                </label>
-              ))}
-            </div>
-          </div>
+  <label className="w-48 font-medium">How did you hear about us?</label>
+  <div className="flex flex-col gap-2">
+    <div className="flex flex-wrap gap-4">
+      {["Google", "LinkedIn", "Instagram", "College TPO", "Friend"].map((src) => (
+        <label key={src} className="flex items-center space-x-1">
+          <input
+            type="radio"
+            name="source"
+            value={src}
+            onChange={handleChange}
+            required
+            checked={formData.source === src}
+          />
+          <span>{src}</span>
+        </label>
+      ))}
+    </div>
+
+    {/* Show input only when "Friend" is selected */}
+    {formData.source === "Friend" && (
+      <input
+        type="text"
+        name="friendName"
+        value={formData.friendName || ""}
+        onChange={(e) =>
+          setFormData((prev) => ({ ...prev, friendName: e.target.value }))
+        }
+        placeholder="Enter your friend's name"
+        className="mt-2 p-2 border rounded w-full"
+        required
+      />
+    )}
+  </div>
+</div>
+
         </div>
       </div>
 
