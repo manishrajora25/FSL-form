@@ -3,17 +3,20 @@ import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import formRoutes from "./routes/formRoute.js";
-
+import "dotenv/config";
 dotenv.config();
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT;
 
 // Middleware
-app.use(cors({
-  origin: "http://localhost:5173",
-  methods: ["GET", "POST", "PUT", "DELETE"]
-}));
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // Routes
