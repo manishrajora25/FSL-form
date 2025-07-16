@@ -2,5 +2,6 @@
 import axios from 'axios';
 
 export const instance = axios.create({
-  baseURL: 'http://localhost:3000/api',
+  baseURL: import.meta.env.VITE_BANCKEND_URL,
+  withCredentials: true,
 });

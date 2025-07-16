@@ -25,5 +25,5 @@ app.use("/api/details", formRoutes);
 // Connect DB and Start Server
 connectDB();
 app.listen(port, () => {
-  console.log(`🚀 Server running at http://localhost:${port}`);
+  console.log(`Server running at port ${port}`);
 });

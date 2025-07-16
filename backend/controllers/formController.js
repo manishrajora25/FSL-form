@@ -2,13 +2,16 @@ import FormModel from "../services/formModel.js";
 
 // POST /api/details/add
 export const createForm = async (req, res) => {
+  console.log("first");
   try {
     const form = new FormModel(req.body);
     await form.save();
     res.status(200).json({ message: "Form submitted successfully" });
   } catch (error) {
     console.error("Form submission error:", error);
-    res.status(500).json({ message: "Form submission failed", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Form submission failed", error: error.message });
   }
 };
 
@@ -18,7 +21,9 @@ export const getAllForms = async (req, res) => {
     const forms = await FormModel.find();
     res.status(200).json(forms);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching forms", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching forms", error: error.message });
   }
 };
 
@@ -29,7 +34,9 @@ export const getFormById = async (req, res) => {
     if (!form) return res.status(404).json({ message: "Form not found" });
     res.status(200).json(form);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching form", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching form", error: error.message });
   }
 };
 
@@ -40,6 +47,8 @@ export const deleteForm = async (req, res) => {
     if (!form) return res.status(404).json({ message: "Form not found" });
     res.status(200).json({ message: "Form deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Error deleting form", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error deleting form", error: error.message });
   }
 };

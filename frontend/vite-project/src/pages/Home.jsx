@@ -45,7 +45,7 @@ const Home = () => {
     }
 
     try {
-      const response = await instance.post("/details/add", formData);
+      const response = await instance.post("/api/details/add", formData);
 
       alert("Form submitted successfully!");
       console.log("(200) Form submitted:", response.data);
