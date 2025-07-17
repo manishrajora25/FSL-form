@@ -74,10 +74,19 @@ const formSchema = new mongoose.Schema({
   friendName: {
     type: String,
   },
+
+  aadhaarFront: {
+    type: String, 
+    required: true,
+  },
+  aadhaarBack: {
+    type: String, 
+    required: true,
+  },
   agreed: {
     type: Boolean,
     required: true,
-  },
+  }
 }, {timestamps: true} );
 
 export default mongoose.model("Form", formSchema);

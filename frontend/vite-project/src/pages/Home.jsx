@@ -4,14 +4,20 @@ import  {instance}  from "../axiosConfig";
 import "./Home.css";
 
 const Home = () => {
-  const [showModal, setShowModal] = useState(false);
+  const [aadhaarFront, setAadhaarFrontFile] = useState(null);
+const [aadhaarBack, setAadhaarBackFile] = useState(null);
 
+
+  const [showModal, setShowModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
     dob: "",
     gender: "",
+    aadhaarFront: null,
+    aadhaarBack: null,
     parentName: "",
     parentPhone: "",
     localAddress: "",
@@ -30,9 +36,12 @@ const Home = () => {
   });
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, type, checked, files } = e.target;
+  
     if (type === "checkbox") {
       setFormData((prev) => ({ ...prev, [name]: checked }));
+    } else if (type === "file") {
+      setFormData((prev) => ({ ...prev, [name]: files[0] })); // file ek hi hai
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -40,24 +49,68 @@ const Home = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!formData.agreed) {
-      alert("Please agree to the Terms & Conditions before submitting.");
-      return;
-    }
-
+    setIsSubmitting(true);
+  
     try {
-      const response = await instance.post("/api/details/add", formData);
-
+      const data = new FormData(); // ✅ Rename to avoid conflict
+  
+      // Append all fields from form state
+      data.append("name", formData.name);
+      data.append("email", formData.email);
+      data.append("phone", formData.phone);
+      data.append("dob", formData.dob);
+      data.append("gender", formData.gender);
+  
+      // ✅ Check if aadhaar files are present
+      if (formData.aadhaarFront) {
+        data.append("aadhaarFront", formData.aadhaarFront);
+      }
+  
+      if (formData.aadhaarBack) {
+        data.append("aadhaarBack", formData.aadhaarBack);
+      }
+  
+      data.append("parentName", formData.parentName);
+      data.append("parentPhone", formData.parentPhone);
+      data.append("localAddress", formData.localAddress);
+      data.append("sameAsLocal", formData.sameAsLocal);
+      data.append("permanentAddress", formData.permanentAddress);
+      data.append("occupation", formData.occupation);
+  
+      // Conditional Fields
+      if (formData.occupation === "Student") {
+        data.append("qualification", formData.qualification);
+        data.append("year", formData.year);
+        data.append("college", formData.college);
+      } else {
+        data.append("designation", formData.designation);
+        data.append("company", formData.company);
+      }
+  
+      data.append("course", formData.course);
+      data.append("source", formData.source);
+      data.append("friendName", formData.friendName);
+      data.append("agreed", formData.agreed);
+  
+      // Send POST request
+      const response = await instance.post("/api/details/add", data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+  
       alert("Form submitted successfully!");
-      console.log("(200) Form submitted:", response.data);
-
+      console.log("Success:", response.data);
+  
+      // Reset form state
       setFormData({
         name: "",
         email: "",
         phone: "",
         dob: "",
         gender: "",
+        aadhaarFront: null,
+        aadhaarBack: null,
         parentName: "",
         parentPhone: "",
         localAddress: "",
@@ -71,15 +124,18 @@ const Home = () => {
         company: "",
         course: "",
         source: "",
-        friendName:"",
+        friendName: "",
         agreed: false,
       });
-
+  
     } catch (error) {
-      console.error("(500) Submission error:", error);
-      alert("Failed to submit form.");
+      console.error("Submission Error:", error);
+      alert("Something went wrong while submitting.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
+  
 
   return (
     <form onSubmit={handleSubmit} className="max-w-[95%] mx-auto mt-[10%] space-y-8">
@@ -122,8 +178,8 @@ const Home = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-2 sm:space-y-0">
         <label className="sm:w-32 font-medium">Aadhaar Card</label>
         <div className="flex flex-col sm:flex-row gap-3 w-full">
-          <input type="file" name="aadhaar" onChange={handleChange} className="bg-gray-500 p-[5px] w-full sm:w-[200px] text-white border rounded" />
-          <input type="file" name="aadhaar2" onChange={handleChange} className="bg-gray-500 p-[5px] w-full sm:w-[200px] text-white border rounded" />
+          <input type="file" accept="image/*" name="aadhaarFront"  onChange={(e) => setFormData({ ...formData, aadhaarFront: e.target.files[0] })}   className="bg-gray-500 p-[5px] w-full sm:w-[200px] text-white border rounded" />
+          <input type="file" accept="image/*"  name="aadhaarBack" onChange={(e) => setFormData({ ...formData, aadhaarBack: e.target.files[0] })} className="bg-gray-500 p-[5px] w-full sm:w-[200px] text-white border rounded" />
         </div>
       </div>
     </div>
@@ -293,11 +349,37 @@ const Home = () => {
   </div>
 
   <button
-    type="submit"
-    className="w-full py-3 rounded text-white font-semibold bg-blue-500 hover:bg-blue-600"
-  >
-    Register
-  </button>
+  type="submit"
+  disabled={isSubmitting}
+  className={`w-full py-3 rounded text-white font-semibold flex items-center justify-center gap-2 ${
+    isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
+  }`}
+>
+  {isSubmitting && (
+    <svg
+      className="animate-spin h-5 w-5 text-white"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      />
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+      />
+    </svg>
+  )}
+  <span>{isSubmitting ? "Submitting..." : "Register"}</span>
+</button>
+
 </div>
 
 {showModal && (
