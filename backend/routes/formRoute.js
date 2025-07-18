@@ -71,12 +71,10 @@
 
 import express from "express";
 import uploadMiddleware from "../middelewares/multerConfig.js";
-// import { createForm } from "../controllers/formController.js";
-import createForm from "../controllers/formController.js";
-
+import { createForm } from "../controllers/formController.js";
 
 const router = express.Router();
 
-router.post("/add", uploadMiddleware, createForm); // use multer middleware here
+router.post("/add", createForm); // ✅ Middleware applied here
 
 export default router;

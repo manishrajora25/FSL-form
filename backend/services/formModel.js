@@ -89,4 +89,5 @@ const formSchema = new mongoose.Schema({
   }
 }, {timestamps: true} );
 
-export default mongoose.model("Form", formSchema);
+const dataModel= mongoose.model("Form", formSchema);
+export default dataModel;
