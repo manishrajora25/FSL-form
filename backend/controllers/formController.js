@@ -1,23 +1,3 @@
-// export const addForm = async (req, res) => {
-//   try {
-//     console.log("req.body:", req.body);
-//     console.log("req.files:", req.files); // If file is included
-
-//     const form = new FormModel(req.body);
-//     await form.save();
-
-//     res.status(200).json({ message: "Form submitted successfully", form });
-//   } catch (error) {
-//     console.error("Form submission error:", error); // Add this
-//     res.status(500).json({ message: "Form submission failed", error: error.message });
-//   }
-// };
-
-
-
-
-// controllers/formController.js
-
 import Form from "../services/formModel.js";
 
 const createForm = async (req, res) => {
@@ -26,6 +6,13 @@ const createForm = async (req, res) => {
 
     const aadhaarFront = req.files?.aadhaarFront?.[0]?.filename || null;
     const aadhaarBack = req.files?.aadhaarBack?.[0]?.filename || null;
+
+
+    console.log("Front Aadhaar:", aadhaarFront);
+    console.log("Back Aadhaar:", aadhaarBack);
+
+
+    
 
     const newForm = new Form({
       name, email, phone, dob, gender,
@@ -38,6 +25,8 @@ const createForm = async (req, res) => {
       aadhaarFront,
       aadhaarBack
     });
+
+    
 
     const savedForm = await newForm.save();
     res.status(201).json({ message: "Form submitted successfully", data: savedForm });

@@ -8,6 +8,14 @@ const Home = () => {
 const [aadhaarBack, setAadhaarBackFile] = useState(null);
 
 
+const [aadharPreview, setAadharPreview] = useState({
+  front: "",
+  back: "",
+});
+
+
+
+
   const [showModal, setShowModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -46,6 +54,7 @@ const [aadhaarBack, setAadhaarBackFile] = useState(null);
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -176,12 +185,67 @@ const [aadhaarBack, setAadhaarBackFile] = useState(null);
       </div>
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-2 sm:space-y-0">
-        <label className="sm:w-32 font-medium">Aadhaar Card</label>
-        <div className="flex flex-col sm:flex-row gap-3 w-full">
-          <input type="file" accept="image/*" name="aadhaarFront"  onChange={(e) => setFormData({ ...formData, aadhaarFront: e.target.files[0] })}   className="bg-gray-500 p-[5px] w-full sm:w-[200px] text-white border rounded" />
-          <input type="file" accept="image/*"  name="aadhaarBack" onChange={(e) => setFormData({ ...formData, aadhaarBack: e.target.files[0] })} className="bg-gray-500 p-[5px] w-full sm:w-[200px] text-white border rounded" />
-        </div>
-      </div>
+  <label className="sm:w-32 font-medium">Aadhaar Card</label>
+  <div className="flex flex-col sm:flex-row gap-3 w-full">
+    <input
+      type="file"
+      accept="image/*"
+      name="aadhaarFront"
+      onChange={(e) => {
+        const file = e.target.files[0];
+        setFormData((prev) => ({ ...prev, aadhaarFront: file }));
+        if (file) {
+          setAadharPreview((prev) => ({
+            ...prev,
+            front: URL.createObjectURL(file),
+          }));
+        }
+      }}
+      className="bg-gray-500 p-[5px] w-full sm:w-[200px] text-white border rounded"
+    />
+    <input
+      type="file"
+      accept="image/*"
+      name="aadhaarBack"
+      onChange={(e) => {
+        const file = e.target.files[0];
+        setFormData((prev) => ({ ...prev, aadhaarBack: file }));
+        if (file) {
+          setAadharPreview((prev) => ({
+            ...prev,
+            back: URL.createObjectURL(file),
+          }));
+        }
+      }}
+      className="bg-gray-500 p-[5px] w-full sm:w-[200px] text-white border rounded"
+    />
+  </div>
+</div>
+
+{/* ✅ Preview Aadhaar Images Below */}
+<div className="flex gap-4 mt-3">
+  {aadharPreview.front && (
+    <div>
+      <p className="text-sm font-medium">Front Preview:</p>
+      <img
+        src={aadharPreview.front}
+        alt="Aadhaar Front"
+        className="w-[200px] h-auto border rounded"
+      />
+    </div>
+  )}
+  {aadharPreview.back && (
+    <div>
+      <p className="text-sm font-medium">Back Preview:</p>
+      <img
+        src={aadharPreview.back}
+        alt="Aadhaar Back"
+        className="w-[200px] h-auto border rounded"
+      />
+    </div>
+  )}
+</div>
+
     </div>
   </div>
 
